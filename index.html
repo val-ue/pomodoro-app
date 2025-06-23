@@ -1,25 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
-    <link rel="stylesheet" href="main.css" />
-    <!--Fonts-->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap"
-      rel="stylesheet"
-    />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="main.css" />
+  <!--Fonts-->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/805760b91e.js" crossorigin="anonymous"></script>
+</head>
 
-  <body class="full-width full-height">
-    <main class="flex justify-content-center full-height">
+<body class="full-width full-height flex justify-content-center align-items-center">
+  <main class="flex column justify-content-center align-items-center full-height">
+    <div class="submit-container full-width">
+      <h1>To-do List</h1>
+      <div class="new-task flex row">
+        <input type="text" class="entry" />
+        <div class="add-icon-container flex align-items-center justify-content-center">
+          <i class="fa-solid fa-square-plus add"></i>
+        </div>
+      </div>
+    </div>
 
-
-    </main>
-
-    <script src="main.js"></script>
-  </body>
-</html>
+    <div class="both-lists flex row full-width align-items-center">
+      <div class="todo-list flex column full-height align-items-center"></div>
+      <div class="done-list flex column full-height align-items-center"></div>
+    </div>
+  </main>
+  <script src="main.js"></script>
+</body>
