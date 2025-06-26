@@ -116,14 +116,21 @@ const createTask = (text, type, list, id, checked) => {
         <input type="checkbox" class="checkbox" ${checked}/>
         <span class="checkmark"></span>
     </label>
+    <i class="fa-regular star fa-star"></i>
     <p class="text-line">${text} <span class="x"><i class="fa-solid fa-square-xmark"></i></span></p>`;
   list.appendChild(itemBox);
+
+  /*<i class="fa-solid fa-star"></i>   filled star   */
 
   const itemCheckbox = itemBox.querySelector(".checkbox");
   itemCheckbox.addEventListener("click", clickCheckbox);
 
   const deleteBox = itemBox.querySelector(".x");
+  const starButton = itemBox.querySelector(".star");
+
   deleteBox.addEventListener("click", () => deleteButton(id));
+  starButton.addEventListener("click", () => priotitize(id));
+
 };
 
 const deleteButton = (id) => {
@@ -133,6 +140,15 @@ const deleteButton = (id) => {
   tasks.splice(findIndex, 1);
   updateStorage();
   refreshTaskList();
+};
+
+const priotitize = (id) => {
+ /* const findIndex = tasks.findIndex((item) => {
+    return item.id === id;
+  });
+  tasks.splice(findIndex, 1);
+  updateStorage();
+  refreshTaskList(); */
 };
 
 refreshTaskList();
