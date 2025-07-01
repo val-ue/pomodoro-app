@@ -6,8 +6,10 @@ const entry = get(".entry");
 const add = get(".add");
 const todoContainer = get(".todo-list");
 const doneContainer = get(".done-list");
+const priorityTitle = get(".priority-title");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+//let isPriorityOn = false;
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -38,7 +40,7 @@ const generateID = () => {
 
 const pushToList = (text) => {
   const giveId = generateID();
-  const newItem = { text: text, id: giveId, isDone: false };
+  const newItem = { text: text, id: giveId, isDone: false, isPriorityOn: false };
   tasks.push(newItem);
   return newItem;
 };
@@ -85,6 +87,10 @@ const refreshTaskList = () => {
   });
 };
 
+const findItemBox = () => {
+
+}
+
 const clickCheckbox = (e) => {
   const itemBox = e.target.closest(".list-item");
   const id = parseInt(itemBox.dataset.id);
@@ -129,7 +135,8 @@ const createTask = (text, type, list, id, checked) => {
   const starButton = itemBox.querySelector(".star");
 
   deleteBox.addEventListener("click", () => deleteButton(id));
-  starButton.addEventListener("click", () => priotitize(id));
+  starButton.addEventListener("click", () => priotitize(text));
+  starButton.addEventListener("click", () => starToggle(starButton, text, id));
 
 };
 
@@ -142,13 +149,37 @@ const deleteButton = (id) => {
   refreshTaskList();
 };
 
-const priotitize = (id) => {
- /* const findIndex = tasks.findIndex((item) => {
-    return item.id === id;
+const starToggle = (starButton, text, id) => {
+
+  //when u click on a star
+  //if any priority = true,
+  //make it false
+  //and make the clicked one true
+  //and change innertext
+  //line 95
+
+  tasks.forEach(() => {
+    isPriorityOn = false;
   });
-  tasks.splice(findIndex, 1);
-  updateStorage();
-  refreshTaskList(); */
+
+  const task = tasks.find((task) => {
+    return task.id === id;
+  });
+
+  task.isPriorityOn = true;
+
+  console.log(task);
+
+
+  starButton.style.color = "white";
+  priorityTitle.innerText = `${text}`;
+
+
+};
+
+const priotitize = (text) => {
+ /* priorityTitle.innerText = `${text}`;*/
+
 };
 
 refreshTaskList();
