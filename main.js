@@ -7,6 +7,11 @@ const add = get(".add");
 const todoContainer = get(".todo-list");
 const doneContainer = get(".done-list");
 const priorityTitle = get(".priority-title");
+const resetButton = get(".reset-button");
+const startButton = get(".start-button");
+const timer = get(".timer");
+
+const workTimeInput = document.getElementById("work-time");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 //let isPriorityOn = false;
@@ -87,10 +92,6 @@ const refreshTaskList = () => {
   });
 };
 
-const findItemBox = () => {
-
-}
-
 const clickCheckbox = (e) => {
   const itemBox = e.target.closest(".list-item");
   const id = parseInt(itemBox.dataset.id);
@@ -126,8 +127,6 @@ const createTask = (text, type, list, id, checked) => {
     <p class="text-line">${text} <span class="x"><i class="fa-solid fa-square-xmark"></i></span></p>`;
   list.appendChild(itemBox);
 
-  /*<i class="fa-solid fa-star"></i>   filled star   */
-
   const itemCheckbox = itemBox.querySelector(".checkbox");
   itemCheckbox.addEventListener("click", clickCheckbox);
 
@@ -135,8 +134,8 @@ const createTask = (text, type, list, id, checked) => {
   const starButton = itemBox.querySelector(".star");
 
   deleteBox.addEventListener("click", () => deleteButton(id));
-  starButton.addEventListener("click", () => priotitize(text));
-  starButton.addEventListener("click", () => starToggle(starButton, text, id));
+  //starButton.addEventListener("click", () => priotitize(text));
+  starButton.addEventListener("click", () => starToggle(starButton, text, id, list));
 
 };
 
@@ -149,40 +148,97 @@ const deleteButton = (id) => {
   refreshTaskList();
 };
 
-const starToggle = (starButton, text, id) => {
+const starToggle = (starButton, text, id, list) => {
+  const allStars = list.querySelectorAll(".star");
 
-  //when u click on a star
-  //if any priority = true,
-  //make it false
-  //and make the clicked one true
-  //and change innertext
-  //line 95
-
-  tasks.forEach(() => {
-    isPriorityOn = false;
+  tasks.forEach((task) => {
+    task.isPriorityOn = false;
   });
 
-  const task = tasks.find((task) => {
+  allStars.forEach((star) => {
+    star.classList.remove("fa-solid");
+    star.classList.add("default-star", "fa-regular");
+    console.log("reversed");
+    console.log(allStars);
+  });
+
+  const selectedTask = tasks.find((task) => {
     return task.id === id;
   });
 
-  task.isPriorityOn = true;
-
-  console.log(task);
-
-
-  starButton.style.color = "white";
+  selectedTask.isPriorityOn = true;
+  console.log(selectedTask);
   priorityTitle.innerText = `${text}`;
 
-
+  if (selectedTask.isPriorityOn === true) {
+    starButton.classList.remove("fa-regular", "default-star");
+    starButton.classList.add("fa-solid", "selected-star");
+  }
+  console.log(tasks);
 };
 
 const priotitize = (text) => {
  /* priorityTitle.innerText = `${text}`;*/
-
 };
+
+
+resetButton.addEventListener("click", () => {
+  
+});
+
+
+/*const updateCountdown = (time) => {
+
+  const minutes = Math.floor(time / 60);
+  let seconds = time % 60;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
+
+  timer.innerHTML = `${minutes}:${seconds}`;
+  time--;
+}; */
+
+let isTimerOn = false;
+
+startButton.addEventListener("click", () => {
+
+  if(isTimerOn === true) {
+    return;
+  }
+
+const workTime = parseInt(workTimeInput.value);
+  if (isNaN(workTime)) {
+    timer.innerHTML = `Whole Numbers Only`;
+    console.log("whole numbers only");
+    return;
+  }
+
+  startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+
+  let time = workTime * 60;
+
+  const updateCountdown = () => {
+    const minutes = Math.floor(time / 60);
+    let seconds = time % 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    timer.innerHTML = `${minutes}:${seconds}`;
+    time--;
+  }; 
+
+  setInterval(updateCountdown, 1000);
+
+  isTimerOn = true;
+});
+
+
+
+
+
+
 
 refreshTaskList();
 
 
 /*<i class="fa-solid fa-pause"></i>*/ 
+
+

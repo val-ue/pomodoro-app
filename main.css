@@ -42,7 +42,7 @@ body {
   font-weight: 600;
   margin: 0;
   padding: 0;
-  min-width: 450px;
+  min-width: 460px;
 }
 
 h1 {
@@ -97,6 +97,14 @@ input:focus {
   color: white;
 }
 
+.selected-star {
+  color: white;
+}
+
+.default-star {
+  color: black;
+}
+
 .fa-square-plus {
   font-size: 50px;
   color: #2a3641;
@@ -108,21 +116,28 @@ main {
 }
 
 .todo-list,
-.done-list {
+.done-list, 
+.pomodoro {
   width: 33%;
-  gap: 10px;
   overflow-y: scroll;
+}
+
+.todo-list,
+.done-list {
+  gap: 10px;
 }
 
 .pomodoro {
   background-color: rgb(153, 192, 184);
-  width: 33%;
   gap: 2%;
   border-radius: 10px;
 }
 
 .pomodoro h2 {
+  width: 90%;
   color: #0c110c;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 
 .break-title {
@@ -132,9 +147,31 @@ main {
   color: #000000a6;
 }
 
+.timer-button-container {
+  width: 50%;
+  gap: 15px;
+}
+
+.start-button, .reset-button {
+  background-color: #f7fff9d1;
+  border-style: none;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.start-button:hover, .reset-button:hover {
+  background-color: white;
+}
+
 .timer {
   font-size: 30px;
   color: #0c110c;
+  text-align: center;
 }
 
 .both-lists {
@@ -174,7 +211,8 @@ main {
 }
 
 .todo-list,
-.done-list {
+.done-list, 
+.pomodoro {
   scrollbar-width: none;
 }
 
