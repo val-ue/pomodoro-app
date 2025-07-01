@@ -152,3 +152,6 @@ const priotitize = (id) => {
 };
 
 refreshTaskList();
+
+
+/*<i class="fa-solid fa-pause"></i>*/ 

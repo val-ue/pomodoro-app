@@ -26,7 +26,30 @@
 
     <div class="both-lists flex row full-width align-items-center">
       <div class="todo-list flex column full-height align-items-center"></div>
-      <div class="pomodoro flex column full-height align-items-center"></div>
+      <div class="pomodoro flex align-items-center flex column full-height align-items-center">
+
+        <h2>Pomodoro</h2>
+        <div class="break flex column align-items-center">
+          <p class="break-title">work time</p>
+          <input class="time-input" id="number" type="number" placeholder="Minutes"/>
+        </div>
+        <div class="break flex column align-items-center">
+          <p class="break-title">short break</p>
+          <input class="time-input" id="" type="number" placeholder="Minutes"/>
+        </div>
+        <div class="break flex column align-items-center">
+          <p class="break-title">long break</p>
+          <input class="time-input" id="" type="number" placeholder="Minutes"/>
+        </div>
+
+        <button><i class="fa-solid fa-play"></i></button>    
+
+       
+        <p class="timer">00:00</p>
+        
+
+
+      </div>
       <div class="done-list flex column full-height align-items-center"></div>
     </div>
   </main>

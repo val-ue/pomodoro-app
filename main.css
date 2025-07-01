@@ -57,6 +57,9 @@ p {
 .submit-container {
   height: 20%;
 }
+.submit-container h1 {
+  color: #252e35;
+}
 
 .new-task {
   height: 45%;
@@ -73,7 +76,7 @@ input {
   font-size: 20px;
   background-color: rgba(255, 255, 255, 0);
   border: none;
-  border-bottom: 3px solid black;
+  border-bottom: 3px solid #252e35;
 }
 
 input:focus {
@@ -88,6 +91,10 @@ input:focus {
 
 .fa-star {
   cursor: pointer;
+}
+
+.fa-star:hover {
+  color: white;
 }
 
 .fa-square-plus {
@@ -108,8 +115,26 @@ main {
 }
 
 .pomodoro {
-background-color: rgb(70, 65, 171);
-width: 33%;
+  background-color: rgb(153, 192, 184);
+  width: 33%;
+  gap: 2%;
+  border-radius: 10px;
+}
+
+.pomodoro h2 {
+  color: #0c110c;
+}
+
+.break-title {
+  width: 85%;
+  text-align: left;
+  font-weight: 500;
+  color: #000000a6;
+}
+
+.timer {
+  font-size: 30px;
+  color: #0c110c;
 }
 
 .both-lists {
