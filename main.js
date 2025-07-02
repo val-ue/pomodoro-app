@@ -12,6 +12,8 @@ const startButton = get(".start-button");
 const timer = get(".timer");
 
 const workTimeInput = document.getElementById("work-time");
+const shortTimeInput = document.getElementById("short-break");
+const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 //let isPriorityOn = false;
@@ -200,12 +202,13 @@ resetButton.addEventListener("click", () => {
 let isTimerOn = false;
 
 startButton.addEventListener("click", () => {
-
-  if(isTimerOn === true) {
+ if(isTimerOn === true) {
     return;
   }
 
-const workTime = parseInt(workTimeInput.value);
+   /*
+   const workTime = parseInt(workTimeInput.value);
+
   if (isNaN(workTime)) {
     timer.innerHTML = `Whole Numbers Only`;
     console.log("whole numbers only");
@@ -213,25 +216,88 @@ const workTime = parseInt(workTimeInput.value);
   }
 
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-
   let time = workTime * 60;
 
   const updateCountdown = () => {
     const minutes = Math.floor(time / 60);
     let seconds = time % 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;
-
     timer.innerHTML = `${minutes}:${seconds}`;
     time--;
   }; 
 
-  setInterval(updateCountdown, 1000);
+  setInterval(updateCountdown, 1000);*/
+
+
+  const workTime = parseInt(workTimeInput.value);
+  const shortBreak = parseInt(shortTimeInput.value);
+  const longBreak = parseInt(longTimeInput.value);
+
+  if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak)) {
+    timer.innerHTML = `Whole Numbers Only`;
+    console.log("whole numbers only");
+    return;
+  }
+
+
+  startCycle(shortBreak, workTime);
+  //startCycle(shortBreak, workTime);
+  //startCycle(shortBreak, workTime);
+  //startCycle(longBreak, workTime);
 
   isTimerOn = true;
 });
 
 
+const startCycle = (rest, work) => {
+  startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+  let time = work * 60;
+  let isWorking = true;
 
+  const updateCountdown = () => {
+    const minutes = Math.floor(time / 60);
+    let seconds = time % 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    timer.innerHTML = `${minutes}:${seconds}`;
+    time--;
+
+    if (time < 0 && isWorking === true) {
+      clearInterval(count);
+      console.log("work done");
+      isWorking = false;
+      time = rest * 60;
+      timer.style.color = "blue";
+    }
+
+    if (time < 0 && isWorking === false) {
+      clearInterval(restCount);
+      console.log("rest done");
+    }
+  }; 
+
+  let restCount = setInterval(updateCountdown, 100);
+  let count = setInterval(updateCountdown, 100);
+  console.log(time);
+
+  //when timer reaches 0, ...v
+
+  /*if (time === 0) {
+    clearInterval(count);
+
+    time = rest * 60;
+    timer.style.color = "blue";
+    setInterval(updateCountdown, 1000);
+    console.log(time);
+  }*/
+
+
+
+
+
+
+
+
+};
 
 
 
