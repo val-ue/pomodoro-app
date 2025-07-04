@@ -10,12 +10,16 @@ const priorityTitle = get(".priority-title");
 const resetButton = get(".reset-button");
 const startButton = get(".start-button");
 const timer = get(".timer");
+const workSound = get(".work-sound");
+const shortBreakSound = get(".short-break-sound");
+const longBreakSound = get(".long-break-sound");
+const statusBar = get(".bar");
+
 const workTimeInput = document.getElementById("work-time");
 const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-//let isPriorityOn = false;
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -105,7 +109,6 @@ const clickCheckbox = (e) => {
   } else {
     task.isDone = false;
   }
-
   updateStorage();
   refreshTaskList();
 };
@@ -135,7 +138,6 @@ const createTask = (text, type, list, id, checked) => {
   const starButton = itemBox.querySelector(".star");
 
   deleteBox.addEventListener("click", () => deleteButton(id));
-  //starButton.addEventListener("click", () => priotitize(text));
   starButton.addEventListener("click", () => starToggle(starButton, text, id, list));
 
 };
@@ -178,26 +180,32 @@ const starToggle = (starButton, text, id, list) => {
   console.log(tasks);
 };
 
-const priotitize = (text) => {
- /* priorityTitle.innerText = `${text}`;*/
-};
-
-/************************************************ */
+/****************** POMODORO **********************/
 
 let isTimerOn = false;
 let isCycleDone = false;
 let cycles = 0;
 let cycleLimit = 3; //number of cycles
-
-let workTime = parseInt(workTimeInput.value);
-let shortBreak = parseInt(shortTimeInput.value);
-let longBreak = parseInt(longTimeInput.value);
-
 let isPaused = false;
 let time;
 let isWorking;
 let count;
 let restTime;
+let staticTime = 0;
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
+
+
+//let barWidth = window.getComputedStyle(statusBar).width;
+
+
+
+
+const playSound = function (sound) {
+  const soundClone = sound.cloneNode(true);
+  soundClone.play();
+};
 
 const updateCountdown = () => {
   const minutes = Math.floor(time / 60);
@@ -206,13 +214,23 @@ const updateCountdown = () => {
   timer.innerHTML = `${minutes}:${seconds}`;
   time--;
 
+  const barWidth = (time / staticTime) * 100;
+  statusBar.style.width = barWidth + "%";
+
   if (time < 0 && isWorking === true) {
     clearInterval(count);
     console.log("work done");
     isWorking = false;
     time = restTime * 60;
+    staticTime = time;
     timer.style.color = "#0c110cad";
     count = setInterval(updateCountdown, 100); 
+
+    if (restTime === shortBreak) {
+      playSound(shortBreakSound);
+    } else {
+      playSound(longBreakSound);
+    }
   }
 
   if (time < 0 && isWorking === false) {
@@ -223,20 +241,20 @@ const updateCountdown = () => {
     console.log(cycles);
 
     if(cycles < cycleLimit) {
-        startCycle(shortBreak, workTime);
-      } else if (cycles === cycleLimit) {
-        startCycle(longBreak, workTime);
-        console.log("long starting");
-      } else {
-        return;
-      }
+      startCycle(shortBreak, workTime);
+    } else if (cycles === cycleLimit) {
+      // playSound(workSound);
+      startCycle(longBreak, workTime);
+      console.log("long starting");
+    } else {
+      return;
+    }
   }
 }; 
 
-
 startButton.addEventListener("click", () => {
  if(isTimerOn === true && isPaused === false) {
-  //pause 
+    //pause 
     clearInterval(count);
     startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
     isPaused = true;
@@ -250,11 +268,9 @@ startButton.addEventListener("click", () => {
     return;
   }
 
-
   workTime = parseInt(workTimeInput.value);
   shortBreak = parseInt(shortTimeInput.value);
   longBreak = parseInt(longTimeInput.value);
-
 
   if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak)) {
     timer.innerHTML = `Whole Numbers Only`;
@@ -266,32 +282,33 @@ startButton.addEventListener("click", () => {
   isTimerOn = true;
   isPaused = false;
   startCycle(shortBreak, workTime);
-
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
   timer.style.color = "#0c110c";
 });
 
 resetButton.addEventListener("click", () => {
-  //cancel cycle
-  //set all the let stuff back to the defaults
+  timer.innerHTML = "00:00";
+  startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
+  timer.style.color = "#0c110c"; 
+  clearInterval(count);
+  cycles = 0;       
+  time = 0;           
+  restTime = 0;
+  isTimerOn = false;
+  isPaused = false; 
+  isWorking = false;
 });
 
-
-
-
 const startCycle = (rest, work) => {
+  playSound(workSound);
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
   timer.style.color = "#0c110c";
   isWorking = true;
   time = work * 60;
+  staticTime = time;
   isCycleDone = false;
   restTime = rest;
   count = setInterval(updateCountdown, 100);
-  //console.log(time);
 };
 
 refreshTaskList();
-
-
-
-
