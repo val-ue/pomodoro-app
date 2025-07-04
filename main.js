@@ -182,47 +182,78 @@ const priotitize = (text) => {
  /* priorityTitle.innerText = `${text}`;*/
 };
 
-
-resetButton.addEventListener("click", () => {
-  
-});
-
-
-/*const updateCountdown = (time) => {
-
-  const minutes = Math.floor(time / 60);
-  let seconds = time % 60;
-  seconds = seconds < 10 ? '0' + seconds : seconds;
-
-  timer.innerHTML = `${minutes}:${seconds}`;
-  time--;
-}; */
+/************************************************ */
 
 let isTimerOn = false;
 let isCycleDone = false;
 let cycles = 0;
-let cycleLimit = 4; //number of cycles
+let cycleLimit = 3; //number of cycles
 
-const workTime = parseInt(workTimeInput.value);
-const shortBreak = parseInt(shortTimeInput.value);
-const longBreak = parseInt(longTimeInput.value);
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
 
 let isPaused = false;
+let time;
+let isWorking;
+let count;
+let restTime;
+
+const updateCountdown = () => {
+  const minutes = Math.floor(time / 60);
+  let seconds = time % 60;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
+  timer.innerHTML = `${minutes}:${seconds}`;
+  time--;
+
+  if (time < 0 && isWorking === true) {
+    clearInterval(count);
+    console.log("work done");
+    isWorking = false;
+    time = restTime * 60;
+    timer.style.color = "#0c110cad";
+    count = setInterval(updateCountdown, 100); 
+  }
+
+  if (time < 0 && isWorking === false) {
+    clearInterval(count);
+    console.log("rest done");
+    isCycleDone = true;
+    cycles++;
+    console.log(cycles);
+
+    if(cycles < cycleLimit) {
+        startCycle(shortBreak, workTime);
+      } else if (cycles === cycleLimit) {
+        startCycle(longBreak, workTime);
+        console.log("long starting");
+      } else {
+        return;
+      }
+  }
+}; 
+
 
 startButton.addEventListener("click", () => {
- if(isTimerOn === true) {
+ if(isTimerOn === true && isPaused === false) {
   //pause 
+    clearInterval(count);
+    startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
     isPaused = true;
     return;
   }
 
   if (isPaused === true) {
-    //resume
+    isPaused = false;
+    startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+    count = setInterval(updateCountdown, 100); // resume countdown
+    return;
   }
 
-//could also maybe store the time and the count 
-//with another variable and do the 
-//startcycle again with those variables
+
+  workTime = parseInt(workTimeInput.value);
+  shortBreak = parseInt(shortTimeInput.value);
+  longBreak = parseInt(longTimeInput.value);
 
 
   if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak)) {
@@ -231,49 +262,13 @@ startButton.addEventListener("click", () => {
     return;
   }
 
+  isWorking = true;
+  isTimerOn = true;
+  isPaused = false;
   startCycle(shortBreak, workTime);
 
-  isTimerOn = true;
-
-   /*
-   const workTime = parseInt(workTimeInput.value);
-
-  if (isNaN(workTime)) {
-    timer.innerHTML = `Whole Numbers Only`;
-    console.log("whole numbers only");
-    return;
-  }
-
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-  let time = workTime * 60;
-
-  const updateCountdown = () => {
-    const minutes = Math.floor(time / 60);
-    let seconds = time % 60;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    timer.innerHTML = `${minutes}:${seconds}`;
-    time--;
-  }; 
-
-  setInterval(updateCountdown, 1000);*/
-
-
-
-
-  /*for (let i = 0; i < cycleLimit; i++) {
-    if(isCycleDone === true) {
-      startCycle(shortBreak, workTime);
-    }
-  };*/
-
-  /*if (isCycleDone === true) {
-    startCycle(shortBreak, workTime);
-  }*/
-  
-  //startCycle(shortBreak, workTime);
-  //startCycle(longBreak, workTime);
-
-
+  timer.style.color = "#0c110c";
 });
 
 resetButton.addEventListener("click", () => {
@@ -282,87 +277,21 @@ resetButton.addEventListener("click", () => {
 });
 
 
+
+
 const startCycle = (rest, work) => {
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
   timer.style.color = "#0c110c";
-  let time = work * 60;
-  let isWorking = true;
+  isWorking = true;
+  time = work * 60;
   isCycleDone = false;
- 
-
-  const updateCountdown = () => {
-    const minutes = Math.floor(time / 60);
-    let seconds = time % 60;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    timer.innerHTML = `${minutes}:${seconds}`;
-    time--;
-
-    if (time < 0 && isWorking === true) {
-      clearInterval(count);
-      console.log("work done");
-      isWorking = false;
-      time = rest * 60;
-      timer.style.color = "#0c110cad";
-    }
-
-    if (time < 0 && isWorking === false) {
-      clearInterval(restCount);
-      console.log("rest done");
-      isCycleDone = true;
-      cycles++;
-      console.log(cycles);
-
-      if(cycles < cycleLimit) {
-          startCycle(shortBreak, workTime);
-        } else if (cycles === cycleLimit) {
-          startCycle(longBreak, workTime);
-          console.log("long starting");
-        } else {
-          return;
-        }
-
-      
-
-
-
-    }
-  }; 
-
-  const pauseButton = () => {
-
-
-  };
-
-  let restCount = setInterval(updateCountdown, 100);
-  let count = setInterval(updateCountdown, 100);
-  console.log(time);
-
-  //when timer reaches 0, ...v
-
-  /*if (time === 0) {
-    clearInterval(count);
-
-    time = rest * 60;
-    timer.style.color = "blue";
-    setInterval(updateCountdown, 1000);
-    console.log(time);
-  }*/
-
-
-
-
-
-
-
-
+  restTime = rest;
+  count = setInterval(updateCountdown, 100);
+  //console.log(time);
 };
-
-
-
 
 refreshTaskList();
 
 
-/*<i class="fa-solid fa-pause"></i>*/ 
 
 
