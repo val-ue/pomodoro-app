@@ -254,3 +254,30 @@ main {
   width: 75%;
   overflow-wrap: anywhere;
 }
+
+.popup {
+  z-index: 1; 
+  background-color:#7aabd7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
+
+  /*display: none;  Hidden by default */
+  position: fixed; /* Stay in place */
+  /*z-index: 1;  Sit on top */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  width: 30%; /* Full width */
+  height: 30%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+
+}
+
+.congrats {
+  margin: 0;
+}

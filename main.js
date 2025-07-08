@@ -138,7 +138,7 @@ const createTask = (text, type, list, id, checked) => {
   const starButton = itemBox.querySelector(".star");
 
   deleteBox.addEventListener("click", () => deleteButton(id));
-  starButton.addEventListener("click", () => starToggle(starButton, text, id, list));
+  starButton.addEventListener("click", () => starToggle(starButton, text, id));
 
 };
 
@@ -151,8 +151,10 @@ const deleteButton = (id) => {
   refreshTaskList();
 };
 
-const starToggle = (starButton, text, id, list) => {
-  const allStars = list.querySelectorAll(".star");
+//const bothLists = document.querySelectorAll(".both-lists");
+
+const starToggle = (starButton, text, id) => {
+  const allStars = document.querySelectorAll(".star");
 
   tasks.forEach((task) => {
     task.isPriorityOn = false;
@@ -161,8 +163,8 @@ const starToggle = (starButton, text, id, list) => {
   allStars.forEach((star) => {
     star.classList.remove("fa-solid");
     star.classList.add("default-star", "fa-regular");
-    console.log("reversed");
-    console.log(allStars);
+    //console.log("reversed");
+    //console.log(allStars);
   });
 
   const selectedTask = tasks.find((task) => {
@@ -170,14 +172,15 @@ const starToggle = (starButton, text, id, list) => {
   });
 
   selectedTask.isPriorityOn = true;
-  console.log(selectedTask);
+  console.log(selectedTask.text);
   priorityTitle.innerText = `${text}`;
 
   if (selectedTask.isPriorityOn === true) {
     starButton.classList.remove("fa-regular", "default-star");
     starButton.classList.add("fa-solid", "selected-star");
   }
-  console.log(tasks);
+  //console.log(tasks);
+  return selectedTask;
 };
 
 /****************** POMODORO **********************/
@@ -196,16 +199,41 @@ let workTime = parseInt(workTimeInput.value);
 let shortBreak = parseInt(shortTimeInput.value);
 let longBreak = parseInt(longTimeInput.value);
 
-
-//let barWidth = window.getComputedStyle(statusBar).width;
-
-
-
-
 const playSound = function (sound) {
   const soundClone = sound.cloneNode(true);
   soundClone.play();
 };
+
+const startConfetti = () => {
+  const duration = 3 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = {
+    startVelocity: 35,
+    spread: 360,
+    ticks: 120,
+    zIndex: 1000
+  };
+
+//https://www.youtube.com/watch?v=zuEqwIb4io0
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    for (let i = 0; i < 3; i++) {
+      confetti(Object.assign({}, defaults, {
+        particleCount: 25,
+        origin: {
+          x: Math.random(),
+          y: Math.random() * 0.2
+        }
+      }));
+    }
+  }, 150);
+  //console.log("confetti");
+};
+
 
 const updateCountdown = () => {
   const minutes = Math.floor(time / 60);
@@ -238,7 +266,7 @@ const updateCountdown = () => {
     console.log("rest done");
     isCycleDone = true;
     cycles++;
-    console.log(cycles);
+    //console.log(cycles);
 
     if(cycles < cycleLimit) {
       startCycle(shortBreak, workTime);
@@ -246,6 +274,9 @@ const updateCountdown = () => {
       // playSound(workSound);
       startCycle(longBreak, workTime);
       console.log("long starting");
+    } else if (cycles > cycleLimit) {
+      startConfetti();
+      openModal();
     } else {
       return;
     }
@@ -311,4 +342,39 @@ const startCycle = (rest, work) => {
   count = setInterval(updateCountdown, 100);
 };
 
+const openModal = () => {
+
+  const finalPopup = document.createElement("div");
+  //finalPopup.classList.add("popup");
+
+  finalPopup.innerHTML = `
+    <div class="popup">
+      <h2 class="congrats">Session Complete!</h2>
+      <h3>Is _ finished?</h3>
+      <div class="button-container">
+        <button id="yes-done">Yes</button>
+        <button id="no-done">No</button>
+      </div>
+    </div>
+  
+  `;
+
+  document.body.appendChild(finalPopup);
+  
+
+
+
+  //use selectedTask.text to get the text for the 
+  // modal
+  //if selected task === null or something, 
+  // dont use the text in the modal 
+  //or give the choice
+
+  //might need a "let selectedTask;" at the start idk"
+  
+
+};
+openModal();
+
 refreshTaskList();
+
