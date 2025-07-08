@@ -14,12 +14,29 @@ const workSound = get(".work-sound");
 const shortBreakSound = get(".short-break-sound");
 const longBreakSound = get(".long-break-sound");
 const statusBar = get(".bar");
-
 const workTimeInput = document.getElementById("work-time");
 const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+let maxId;
+let idNumber = maxId;
+let selectedTask;
+
+//for pomodoro
+let isTimerOn = false;
+let isCycleDone = false;
+let cycles = 0;
+let cycleLimit = 3; //number of cycles
+let isPaused = false;
+let time;
+let isWorking;
+let count;
+let restTime;
+let staticTime = 0;
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -33,15 +50,11 @@ let allTaskIds = tasks.map((task) => {
   }
 });
 
-let maxId;
-
 if (allTaskIds.length > 0) {
   maxId = Math.max(...allTaskIds);
 } else {
   maxId = 0;
 }
-
-let idNumber = maxId;
 
 const generateID = () => {
   idNumber += 1;
@@ -139,19 +152,17 @@ const createTask = (text, type, list, id, checked) => {
 
   deleteBox.addEventListener("click", () => deleteButton(id));
   starButton.addEventListener("click", () => starToggle(starButton, text, id));
-
 };
 
 const deleteButton = (id) => {
   const findIndex = tasks.findIndex((item) => {
     return item.id === id;
   });
+
   tasks.splice(findIndex, 1);
   updateStorage();
   refreshTaskList();
 };
-
-//const bothLists = document.querySelectorAll(".both-lists");
 
 const starToggle = (starButton, text, id) => {
   const allStars = document.querySelectorAll(".star");
@@ -163,41 +174,22 @@ const starToggle = (starButton, text, id) => {
   allStars.forEach((star) => {
     star.classList.remove("fa-solid");
     star.classList.add("default-star", "fa-regular");
-    //console.log("reversed");
-    //console.log(allStars);
   });
 
-  const selectedTask = tasks.find((task) => {
+  selectedTask = tasks.find((task) => {
     return task.id === id;
   });
 
   selectedTask.isPriorityOn = true;
-  console.log(selectedTask.text);
   priorityTitle.innerText = `${text}`;
 
   if (selectedTask.isPriorityOn === true) {
     starButton.classList.remove("fa-regular", "default-star");
     starButton.classList.add("fa-solid", "selected-star");
   }
-  //console.log(tasks);
-  return selectedTask;
 };
 
 /****************** POMODORO **********************/
-
-let isTimerOn = false;
-let isCycleDone = false;
-let cycles = 0;
-let cycleLimit = 3; //number of cycles
-let isPaused = false;
-let time;
-let isWorking;
-let count;
-let restTime;
-let staticTime = 0;
-let workTime = parseInt(workTimeInput.value);
-let shortBreak = parseInt(shortTimeInput.value);
-let longBreak = parseInt(longTimeInput.value);
 
 const playSound = function (sound) {
   const soundClone = sound.cloneNode(true);
@@ -214,7 +206,6 @@ const startConfetti = () => {
     zIndex: 1000
   };
 
-//https://www.youtube.com/watch?v=zuEqwIb4io0
   const interval = setInterval(() => {
     const timeLeft = animationEnd - Date.now();
     if (timeLeft <= 0) {
@@ -231,9 +222,11 @@ const startConfetti = () => {
       }));
     }
   }, 150);
-  //console.log("confetti");
 };
 
+//const timeFormat = () => {
+
+//};
 
 const updateCountdown = () => {
   const minutes = Math.floor(time / 60);
@@ -241,7 +234,6 @@ const updateCountdown = () => {
   seconds = seconds < 10 ? '0' + seconds : seconds;
   timer.innerHTML = `${minutes}:${seconds}`;
   time--;
-
   const barWidth = (time / staticTime) * 100;
   statusBar.style.width = barWidth + "%";
 
@@ -266,12 +258,10 @@ const updateCountdown = () => {
     console.log("rest done");
     isCycleDone = true;
     cycles++;
-    //console.log(cycles);
 
     if(cycles < cycleLimit) {
       startCycle(shortBreak, workTime);
     } else if (cycles === cycleLimit) {
-      // playSound(workSound);
       startCycle(longBreak, workTime);
       console.log("long starting");
     } else if (cycles > cycleLimit) {
@@ -343,38 +333,56 @@ const startCycle = (rest, work) => {
 };
 
 const openModal = () => {
-
   const finalPopup = document.createElement("div");
-  //finalPopup.classList.add("popup");
 
-  finalPopup.innerHTML = `
-    <div class="popup">
-      <h2 class="congrats">Session Complete!</h2>
-      <h3>Is _ finished?</h3>
-      <div class="button-container">
-        <button id="yes-done">Yes</button>
-        <button id="no-done">No</button>
+  if (!selectedTask) {
+    finalPopup.innerHTML = `
+      <div class="popup">
+        <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
+        <h2 class="congrats">Session Complete!</h2>
       </div>
-    </div>
-  
-  `;
+    `;
+  } else {
+    finalPopup.innerHTML = `
+      <div class="popup flex column justify-content-center align-items-center">
+        <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
+        <h2 class="congrats">Session Complete!</h2>
+        <h3>Is "${selectedTask.text}" finished?</h3>
+        <div class="modal-button-container flex align-items-center justify-content-center">
+          <button id="yes-done" class="start-button">Yes</button>
+          <button id="no-done" class="start-button">No</button>
+        </div>
+      </div>
+    `;
+  }
 
   document.body.appendChild(finalPopup);
+
+  const itsDone = document.getElementById("yes-done");
+  const notDone = document.getElementById("no-done");
+  const closeButtonX = document.getElementById("close-modal-x");
   
+  const closeModal = () => {
+    finalPopup.remove();
+  };
 
+  if (itsDone) {
+    itsDone.addEventListener("click", () => {
+      selectedTask.isDone = true;
+      closeModal();
+      updateStorage();
+      refreshTaskList();
+    });
+  }
 
+  if (notDone) {
+    notDone.addEventListener("click", closeModal);
+  }
 
-  //use selectedTask.text to get the text for the 
-  // modal
-  //if selected task === null or something, 
-  // dont use the text in the modal 
-  //or give the choice
-
-  //might need a "let selectedTask;" at the start idk"
-  
-
+  if (closeButtonX) {
+    closeButtonX.addEventListener("click", closeModal);
+  }
 };
-openModal();
 
 refreshTaskList();
 

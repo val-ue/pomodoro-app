@@ -87,17 +87,14 @@ input:focus {
 
 .add-icon-container {
   width: 15%;
+  align-items: end;
 }
 
 .fa-star {
   cursor: pointer;
 }
 
-.fa-star:hover {
-  color: white;
-}
-
-.selected-star {
+.fa-star:hover, .selected-star {
   color: white;
 }
 
@@ -116,7 +113,7 @@ main {
 }
 
 .todo-list,
-.done-list, 
+.done-list,
 .pomodoro {
   width: 33%;
   overflow-y: scroll;
@@ -152,7 +149,8 @@ main {
   gap: 15px;
 }
 
-.start-button, .reset-button {
+.start-button,
+.reset-button {
   background-color: #f7fff9d1;
   border-style: none;
   border-radius: 3px;
@@ -164,7 +162,8 @@ main {
   cursor: pointer;
 }
 
-.start-button:hover, .reset-button:hover {
+.start-button:hover,
+.reset-button:hover {
   background-color: white;
 }
 
@@ -173,10 +172,6 @@ main {
   color: #0c110c;
   text-align: center;
 }
-
-/*.progress, .bar {
-  border-radius: 3px;
-}*/
 
 .progress {
   background-color: transparent;
@@ -230,7 +225,7 @@ main {
 }
 
 .todo-list,
-.done-list, 
+.done-list,
 .pomodoro {
   scrollbar-width: none;
 }
@@ -256,28 +251,31 @@ main {
 }
 
 .popup {
-  z-index: 1; 
-  background-color:#7aabd7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  z-index: 1;
+  background-color: #7aabd7;
   padding: 20px;
   text-align: center;
-
-  /*display: none;  Hidden by default */
-  position: fixed; /* Stay in place */
-  /*z-index: 1;  Sit on top */
+  position: fixed;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 10px;
-  width: 30%; /* Full width */
-  height: 30%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-
+  width: 30%;
+  height: 30%;
+  overflow: auto;
 }
 
 .congrats {
   margin: 0;
+}
+
+.modal-button-container {
+  gap: 15px;
+}
+
+.fa-xmark {
+  text-align: right;
+  cursor: pointer;
+  color: #000000;
+  font-size: 21px;
 }
