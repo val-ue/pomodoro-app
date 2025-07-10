@@ -90,6 +90,10 @@ input:focus {
   align-items: end;
 }
 
+.add:hover {
+  color: #1a2229;
+}
+
 .fa-star {
   cursor: pointer;
 }
@@ -157,8 +161,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  width: 30px;
+  height: 33px;
+  width: 33px;
   cursor: pointer;
 }
 
@@ -179,6 +183,7 @@ main {
   width: 65%;
   height: 9px;
   border-radius: 3px;
+  margin-bottom: 18px;
 }
 
 .bar {
@@ -261,8 +266,15 @@ main {
   transform: translate(-50%, -50%);
   border-radius: 10px;
   width: 30%;
+  min-width: 120px;
   height: 30%;
   overflow: auto;
+  border: 3px solid black;
+}
+
+.session-button {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .congrats {

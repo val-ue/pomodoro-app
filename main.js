@@ -14,29 +14,12 @@ const workSound = get(".work-sound");
 const shortBreakSound = get(".short-break-sound");
 const longBreakSound = get(".long-break-sound");
 const statusBar = get(".bar");
+
 const workTimeInput = document.getElementById("work-time");
 const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-let maxId;
-let idNumber = maxId;
-let selectedTask;
-
-//for pomodoro
-let isTimerOn = false;
-let isCycleDone = false;
-let cycles = 0;
-let cycleLimit = 3; //number of cycles
-let isPaused = false;
-let time;
-let isWorking;
-let count;
-let restTime;
-let staticTime = 0;
-let workTime = parseInt(workTimeInput.value);
-let shortBreak = parseInt(shortTimeInput.value);
-let longBreak = parseInt(longTimeInput.value);
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -50,11 +33,15 @@ let allTaskIds = tasks.map((task) => {
   }
 });
 
+let maxId;
+
 if (allTaskIds.length > 0) {
   maxId = Math.max(...allTaskIds);
 } else {
   maxId = 0;
 }
+
+let idNumber = maxId;
 
 const generateID = () => {
   idNumber += 1;
@@ -152,17 +139,20 @@ const createTask = (text, type, list, id, checked) => {
 
   deleteBox.addEventListener("click", () => deleteButton(id));
   starButton.addEventListener("click", () => starToggle(starButton, text, id));
+
 };
 
 const deleteButton = (id) => {
   const findIndex = tasks.findIndex((item) => {
     return item.id === id;
   });
-
   tasks.splice(findIndex, 1);
   updateStorage();
   refreshTaskList();
 };
+
+let selectedTask;
+//const bothLists = document.querySelectorAll(".both-lists");
 
 const starToggle = (starButton, text, id) => {
   const allStars = document.querySelectorAll(".star");
@@ -174,6 +164,8 @@ const starToggle = (starButton, text, id) => {
   allStars.forEach((star) => {
     star.classList.remove("fa-solid");
     star.classList.add("default-star", "fa-regular");
+    //console.log("reversed");
+    //console.log(allStars);
   });
 
   selectedTask = tasks.find((task) => {
@@ -181,15 +173,32 @@ const starToggle = (starButton, text, id) => {
   });
 
   selectedTask.isPriorityOn = true;
+  console.log(selectedTask.text);
   priorityTitle.innerText = `${text}`;
 
   if (selectedTask.isPriorityOn === true) {
     starButton.classList.remove("fa-regular", "default-star");
     starButton.classList.add("fa-solid", "selected-star");
   }
+  console.log(tasks);
+ // return selectedTask;
 };
 
 /****************** POMODORO **********************/
+
+let isTimerOn = false;
+let isCycleDone = false;
+let cycles = 0;
+let cycleLimit = 3; //number of cycles
+let isPaused = false;
+let time;
+let isWorking;
+let count;
+let restTime;
+let staticTime = 0;
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
 
 const playSound = function (sound) {
   const soundClone = sound.cloneNode(true);
@@ -206,6 +215,7 @@ const startConfetti = () => {
     zIndex: 1000
   };
 
+//https://www.youtube.com/watch?v=zuEqwIb4io0
   const interval = setInterval(() => {
     const timeLeft = animationEnd - Date.now();
     if (timeLeft <= 0) {
@@ -222,11 +232,9 @@ const startConfetti = () => {
       }));
     }
   }, 150);
+  //console.log("confetti");
 };
 
-//const timeFormat = () => {
-
-//};
 
 const updateCountdown = () => {
   const minutes = Math.floor(time / 60);
@@ -234,6 +242,7 @@ const updateCountdown = () => {
   seconds = seconds < 10 ? '0' + seconds : seconds;
   timer.innerHTML = `${minutes}:${seconds}`;
   time--;
+
   const barWidth = (time / staticTime) * 100;
   statusBar.style.width = barWidth + "%";
 
@@ -258,10 +267,12 @@ const updateCountdown = () => {
     console.log("rest done");
     isCycleDone = true;
     cycles++;
+    //console.log(cycles);
 
     if(cycles < cycleLimit) {
       startCycle(shortBreak, workTime);
     } else if (cycles === cycleLimit) {
+      // playSound(workSound);
       startCycle(longBreak, workTime);
       console.log("long starting");
     } else if (cycles > cycleLimit) {
