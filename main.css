@@ -98,7 +98,8 @@ input:focus {
   cursor: pointer;
 }
 
-.fa-star:hover, .selected-star {
+.fa-star:hover,
+.selected-star {
   color: white;
 }
 
@@ -139,6 +140,7 @@ main {
   color: #0c110c;
   text-align: center;
   overflow-wrap: break-word;
+  margin-bottom: 5px;
 }
 
 .break-title {
@@ -183,7 +185,7 @@ main {
   width: 65%;
   height: 9px;
   border-radius: 3px;
-  margin-bottom: 18px;
+  margin-bottom: 5px;
 }
 
 .bar {
@@ -191,6 +193,11 @@ main {
   width: 100%;
   height: 9px;
   transition: linear;
+}
+
+.cycle-status {
+  font-size: 18px;
+  margin-bottom: 18px;
 }
 
 .both-lists {
@@ -267,7 +274,7 @@ main {
   border-radius: 10px;
   width: 30%;
   min-width: 120px;
-  height: 30%;
+  height: fit-content;
   overflow: auto;
   border: 3px solid black;
 }

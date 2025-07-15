@@ -14,12 +14,30 @@ const workSound = get(".work-sound");
 const shortBreakSound = get(".short-break-sound");
 const longBreakSound = get(".long-break-sound");
 const statusBar = get(".bar");
-
+const cycleStatus = get(".cycle-status");
 const workTimeInput = document.getElementById("work-time");
 const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+let maxId;
+let idNumber = maxId;
+
+//for pomodoro
+let selectedTask;
+let isTimerOn = false;
+let isCycleDone = false;
+let cycles = 0;
+let cycleLimit = 3; //number of cycles
+let isPaused = false;
+let time;
+let isWorking;
+let count;
+let restTime;
+let staticTime = 0;
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -33,15 +51,11 @@ let allTaskIds = tasks.map((task) => {
   }
 });
 
-let maxId;
-
 if (allTaskIds.length > 0) {
   maxId = Math.max(...allTaskIds);
 } else {
   maxId = 0;
 }
-
-let idNumber = maxId;
 
 const generateID = () => {
   idNumber += 1;
@@ -50,7 +64,12 @@ const generateID = () => {
 
 const pushToList = (text) => {
   const giveId = generateID();
-  const newItem = { text: text, id: giveId, isDone: false, isPriorityOn: false };
+  const newItem = {
+    text: text,
+    id: giveId,
+    isDone: false,
+    isPriorityOn: false
+  };
   tasks.push(newItem);
   return newItem;
 };
@@ -104,6 +123,10 @@ const clickCheckbox = (e) => {
     return task.id === id;
   });
 
+  if (!task) {
+    return;
+  }
+
   if (task.isDone === false) {
     task.isDone = true;
   } else {
@@ -139,20 +162,17 @@ const createTask = (text, type, list, id, checked) => {
 
   deleteBox.addEventListener("click", () => deleteButton(id));
   starButton.addEventListener("click", () => starToggle(starButton, text, id));
-
 };
 
 const deleteButton = (id) => {
   const findIndex = tasks.findIndex((item) => {
     return item.id === id;
   });
+
   tasks.splice(findIndex, 1);
   updateStorage();
   refreshTaskList();
 };
-
-let selectedTask;
-//const bothLists = document.querySelectorAll(".both-lists");
 
 const starToggle = (starButton, text, id) => {
   const allStars = document.querySelectorAll(".star");
@@ -164,41 +184,26 @@ const starToggle = (starButton, text, id) => {
   allStars.forEach((star) => {
     star.classList.remove("fa-solid");
     star.classList.add("default-star", "fa-regular");
-    //console.log("reversed");
-    //console.log(allStars);
   });
 
   selectedTask = tasks.find((task) => {
     return task.id === id;
   });
 
+  if (!selectedTask) {
+    return;
+  }
+
   selectedTask.isPriorityOn = true;
-  console.log(selectedTask.text);
   priorityTitle.innerText = `${text}`;
 
   if (selectedTask.isPriorityOn === true) {
     starButton.classList.remove("fa-regular", "default-star");
     starButton.classList.add("fa-solid", "selected-star");
   }
-  console.log(tasks);
- // return selectedTask;
 };
 
 /****************** POMODORO **********************/
-
-let isTimerOn = false;
-let isCycleDone = false;
-let cycles = 0;
-let cycleLimit = 3; //number of cycles
-let isPaused = false;
-let time;
-let isWorking;
-let count;
-let restTime;
-let staticTime = 0;
-let workTime = parseInt(workTimeInput.value);
-let shortBreak = parseInt(shortTimeInput.value);
-let longBreak = parseInt(longTimeInput.value);
 
 const playSound = function (sound) {
   const soundClone = sound.cloneNode(true);
@@ -215,7 +220,6 @@ const startConfetti = () => {
     zIndex: 1000
   };
 
-//https://www.youtube.com/watch?v=zuEqwIb4io0
   const interval = setInterval(() => {
     const timeLeft = animationEnd - Date.now();
     if (timeLeft <= 0) {
@@ -223,118 +227,162 @@ const startConfetti = () => {
     }
 
     for (let i = 0; i < 3; i++) {
-      confetti(Object.assign({}, defaults, {
-        particleCount: 25,
-        origin: {
-          x: Math.random(),
-          y: Math.random() * 0.2
-        }
-      }));
+      confetti(
+        Object.assign({}, defaults, {
+          particleCount: 25,
+          origin: {
+            x: Math.random(),
+            y: Math.random() * 0.2
+          }
+        })
+      );
     }
   }, 150);
-  //console.log("confetti");
 };
 
-
-const updateCountdown = () => {
+const formatTime = (time) => {
   const minutes = Math.floor(time / 60);
   let seconds = time % 60;
-  seconds = seconds < 10 ? '0' + seconds : seconds;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
   timer.innerHTML = `${minutes}:${seconds}`;
-  time--;
+};
 
+const updateProgressBar = (time, staticTime) => {
   const barWidth = (time / staticTime) * 100;
   statusBar.style.width = barWidth + "%";
+};
+
+const endWorkCycle = () => {
+  clearInterval(count);
+  isWorking = false;
+  time = restTime * 60;
+  staticTime = time;
+  timer.style.color = "#0c110cad";
+  cycleStatus.innerText = `Break`;
+  count = setInterval(updateCountdown, 100);
+
+  if (restTime === shortBreak) {
+    playSound(shortBreakSound);
+  } else {
+    playSound(longBreakSound);
+  }
+};
+
+const endRestCycle = () => {
+  clearInterval(count);
+  isCycleDone = true;
+  cycles++;
+
+  if (cycles < cycleLimit) {
+    startCycle(shortBreak, workTime);
+  } else if (cycles === cycleLimit) {
+    startCycle(longBreak, workTime);
+  } else if (cycles > cycleLimit) {
+    startConfetti();
+    openModal();
+    reset();
+  } else {
+    return;
+  }
+};
+
+const updateCountdown = () => {
+  formatTime(time);
+  updateProgressBar(time, staticTime);
+  time--;
 
   if (time < 0 && isWorking === true) {
-    clearInterval(count);
-    console.log("work done");
-    isWorking = false;
-    time = restTime * 60;
-    staticTime = time;
-    timer.style.color = "#0c110cad";
-    count = setInterval(updateCountdown, 100); 
-
-    if (restTime === shortBreak) {
-      playSound(shortBreakSound);
-    } else {
-      playSound(longBreakSound);
-    }
+    endWorkCycle();
   }
 
   if (time < 0 && isWorking === false) {
-    clearInterval(count);
-    console.log("rest done");
-    isCycleDone = true;
-    cycles++;
-    //console.log(cycles);
-
-    if(cycles < cycleLimit) {
-      startCycle(shortBreak, workTime);
-    } else if (cycles === cycleLimit) {
-      // playSound(workSound);
-      startCycle(longBreak, workTime);
-      console.log("long starting");
-    } else if (cycles > cycleLimit) {
-      startConfetti();
-      openModal();
-    } else {
-      return;
-    }
+    endRestCycle();
   }
-}; 
+};
+
+const pauseTime = () => {
+  clearInterval(count);
+  startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
+  isPaused = true;
+};
+
+const resumeTime = () => {
+  isPaused = false;
+  startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+  count = setInterval(updateCountdown, 100);
+};
+
+const getInputs = () => {
+  workTime = parseInt(workTimeInput.value);
+  shortBreak = parseInt(shortTimeInput.value);
+  longBreak = parseInt(longTimeInput.value);
+};
 
 startButton.addEventListener("click", () => {
- if(isTimerOn === true && isPaused === false) {
-    //pause 
-    clearInterval(count);
-    startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
-    isPaused = true;
+  if (isTimerOn === true && isPaused === false) {
+    pauseTime();
     return;
   }
 
   if (isPaused === true) {
-    isPaused = false;
-    startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-    count = setInterval(updateCountdown, 100); // resume countdown
+    resumeTime();
     return;
   }
 
-  workTime = parseInt(workTimeInput.value);
-  shortBreak = parseInt(shortTimeInput.value);
-  longBreak = parseInt(longTimeInput.value);
+  if (!selectedTask) {
+    priorityTitle.innerText = `Select a task`;
+    return;
+  }
+
+  getInputs();
 
   if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak)) {
-    timer.innerHTML = `Whole Numbers Only`;
-    console.log("whole numbers only");
-    return;
+    workTime = 10;
+    workTimeInput.value = `${workTime}`;
+    shortBreak = 5;
+    shortTimeInput.value = `${shortBreak}`;
+    longBreak = 10;
+    longTimeInput.value = `${longBreak}`;
   }
 
   isWorking = true;
   isTimerOn = true;
   isPaused = false;
+
   startCycle(shortBreak, workTime);
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
   timer.style.color = "#0c110c";
 });
 
-resetButton.addEventListener("click", () => {
+const reset = () => {
   timer.innerHTML = "00:00";
   startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
-  timer.style.color = "#0c110c"; 
+  timer.style.color = "#0c110c";
   clearInterval(count);
-  cycles = 0;       
-  time = 0;           
+  cycles = 0;
+  time = 0;
   restTime = 0;
   isTimerOn = false;
-  isPaused = false; 
+  isPaused = false;
   isWorking = false;
+  statusBar.style.width = 100 + "%";
+  workTimeInput.value = ``;
+  shortBreak = 5;
+  shortTimeInput.value = ``;
+  longBreak = 10;
+  longTimeInput.value = ``;
+  cycleStatus.innerText = ``;
+};
+
+resetButton.addEventListener("click", () => {
+  reset();
 });
 
 const startCycle = (rest, work) => {
   playSound(workSound);
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
   timer.style.color = "#0c110c";
+  cycleStatus.innerText = `work`;
   isWorking = true;
   time = work * 60;
   staticTime = time;
@@ -343,36 +391,29 @@ const startCycle = (rest, work) => {
   count = setInterval(updateCountdown, 100);
 };
 
+const createModalHtml = (finalPopup) => {
+  finalPopup.innerHTML = `
+    <div class="popup flex column justify-content-center align-items-center">
+      <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
+      <h2 class="congrats">Session Complete!</h2>
+      <h3>Is "${selectedTask.text}" finished?</h3>
+      <div class="modal-button-container flex align-items-center justify-content-center">
+        <button id="yes-done" class="start-button session-button">Yes</button>
+        <button id="no-done" class="start-button session-button">No</button>
+      </div>
+    </div>
+  `;
+};
+
 const openModal = () => {
   const finalPopup = document.createElement("div");
-
-  if (!selectedTask) {
-    finalPopup.innerHTML = `
-      <div class="popup">
-        <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
-        <h2 class="congrats">Session Complete!</h2>
-      </div>
-    `;
-  } else {
-    finalPopup.innerHTML = `
-      <div class="popup flex column justify-content-center align-items-center">
-        <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
-        <h2 class="congrats">Session Complete!</h2>
-        <h3>Is "${selectedTask.text}" finished?</h3>
-        <div class="modal-button-container flex align-items-center justify-content-center">
-          <button id="yes-done" class="start-button">Yes</button>
-          <button id="no-done" class="start-button">No</button>
-        </div>
-      </div>
-    `;
-  }
-
+  createModalHtml(finalPopup);
   document.body.appendChild(finalPopup);
 
   const itsDone = document.getElementById("yes-done");
   const notDone = document.getElementById("no-done");
   const closeButtonX = document.getElementById("close-modal-x");
-  
+
   const closeModal = () => {
     finalPopup.remove();
   };
@@ -396,4 +437,3 @@ const openModal = () => {
 };
 
 refreshTaskList();
-
