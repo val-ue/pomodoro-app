@@ -20,8 +20,6 @@ const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-let maxId;
-let idNumber = maxId;
 
 //for pomodoro
 let selectedTask;
@@ -51,11 +49,15 @@ let allTaskIds = tasks.map((task) => {
   }
 });
 
+let maxId;
+
 if (allTaskIds.length > 0) {
   maxId = Math.max(...allTaskIds);
 } else {
   maxId = 0;
 }
+
+let idNumber = maxId;
 
 const generateID = () => {
   idNumber += 1;
