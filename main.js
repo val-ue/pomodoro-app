@@ -9,36 +9,37 @@ const doneContainer = get(".done-list");
 const priorityTitle = get(".priority-title");
 const resetButton = get(".reset-button");
 const startButton = get(".start-button");
-const aboutPomodoro.timer = get(".aboutPomodoro.timer");
+const timer = get(".timer");
 const workSound = get(".work-sound");
 const shortBreakSound = get(".short-break-sound");
 const longBreakSound = get(".long-break-sound");
 const statusBar = get(".bar");
 const cycleStatus = get(".cycle-status");
-const workTimeInput = document.getElementById("work-aboutPomodoro.time");
+const workTimeInput = document.getElementById("work-time");
 const shortTimeInput = document.getElementById("short-break");
 const longTimeInput = document.getElementById("long-break");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 
 //for pomodoro
-let selectedTask = null;
-let = false;
-let = false;
+//let selectedTask = null;
+let isTimerOn = false;
+let isCycleDone = false;
 let cycles = 0;
-let cycleLimit = 3; //number of aboutPomodoro.cycles
+let cycleLimit = 3; //number of cycles
 let isPaused = false;
 let time;
 let isWorking;
 let count;
 let restTime;
 let staticTime = 0;
-
-//clearInterval?????
+let workTime = parseInt(workTimeInput.value);
+let shortBreak = parseInt(shortTimeInput.value);
+let longBreak = parseInt(longTimeInput.value);
 
 const aboutPomodoro = {
   selectedTask: null,
-  isTimerOn: false,
+ /* isTimerOn: false,
   isCycleDone: false,
   cycles: 0,
   cycleLimit: 3, //number of cycles
@@ -47,14 +48,8 @@ const aboutPomodoro = {
   isWorking: null,
   count: null,
   restTime: null,
-  staticTime: 0
+  staticTime: 0*/
 };
-
-
-
-let workTime = parseInt(workTimeInput.value);
-let shortBreak = parseInt(shortTimeInput.value);
-let longBreak = parseInt(longTimeInput.value);
 
 const updateStorage = () => {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -261,28 +256,28 @@ const startConfetti = () => {
   }, 150);
 };
 
-const formatTime = (aboutPomodoro) => {
-  const minutes = Math.floor(aboutPomodoro.time / 60);
-  let seconds = aboutPomodoro.time % 60;
+const formatTime = (time) => {
+  const minutes = Math.floor(time / 60);
+  let seconds = time % 60;
   seconds = seconds < 10 ? "0" + seconds : seconds;
   timer.innerHTML = `${minutes}:${seconds}`;
 };
 
-const updateProgressBar = (aboutPomodoro) => {
-  const barWidth = (aboutPomodoro.time / aboutPomodoro.staticTime) * 100;
+const updateProgressBar = (time, staticTime) => {
+  const barWidth = (time / staticTime) * 100;
   statusBar.style.width = barWidth + "%";
 };
 
 const endWorkCycle = () => {
-  clearInterval(aboutPomodoro);
-  aboutPomodoro.isWorking = false;
-  aboutPomodoro.time = aboutPomodoro.restTime * 60;
-  aboutPomodoro.staticTime = aboutPomodoro.time;
+  clearInterval(count);
+  isWorking = false;
+  time = restTime * 60;
+  staticTime = time;
   timer.style.color = "#0c110cad";
   cycleStatus.innerText = `Break`;
-  aboutPomodoro.count = setInterval(updateCountdown, 100);
+  count = setInterval(updateCountdown, 100);
 
-  if (aboutPomodoro.restTime === shortBreak) {
+  if (restTime === shortBreak) {
     playSound(shortBreakSound);
   } else {
     playSound(longBreakSound);
@@ -290,15 +285,15 @@ const endWorkCycle = () => {
 };
 
 const endRestCycle = () => {
-  clearInterval(aboutPomodoro.count);
-  aboutPomodoro.isCycleDone = true;
-  aboutPomodoro.cycles++;
+  clearInterval(count);
+  isCycleDone = true;
+  cycles++;
 
-  if (aboutPomodoro.cycles < aboutPomodoro.cycleLimit) {
+  if (cycles < cycleLimit) {
     startCycle(shortBreak, workTime);
-  } else if (aboutPomodoro.cycles === aboutPomodoro.cycleLimit) {
+  } else if (cycles === cycleLimit) {
     startCycle(longBreak, workTime);
-  } else if (aboutPomodoro.cycles > aboutPomodoro.cycleLimit) {
+  } else if (cycles > cycleLimit) {
     startConfetti();
     openModal();
     reset();
@@ -308,29 +303,29 @@ const endRestCycle = () => {
 };
 
 const updateCountdown = () => {
-  formatTime(aboutPomodoro.time);
-  updateProgressBar(aboutPomodoro.time, aboutPomodoro);
-  aboutPomodoro.time--;
+  formatTime(time);
+  updateProgressBar(time, staticTime);
+  time--;
 
-  if (aboutPomodoro.time < 0 && aboutPomodoro.isWorking === true) {
+  if (time < 0 && isWorking === true) {
     endWorkCycle();
   }
 
-  if (aboutPomodoro.time < 0 && aboutPomodoro.isWorking === false) {
+  if (time < 0 && isWorking === false) {
     endRestCycle();
   }
 };
 
 const pauseTime = () => {
-  clearInterval(aboutPomodoro);
+  clearInterval(count);
   startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
-  aboutPomodoro.isPaused = true;
+  isPaused = true;
 };
 
 const resumeTime = () => {
-  aboutPomodoro.isPaused = false;
+  isPaused = false;
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-  aboutPomodoro.count = setInterval(updateCountdown, 100);
+  count = setInterval(updateCountdown, 100);
 };
 
 const getInputs = () => {
@@ -340,17 +335,17 @@ const getInputs = () => {
 };
 
 startButton.addEventListener("click", () => {
-  if (aboutPomodoro. === true && aboutPomodoro.isPaused === false) {
+  if (isTimerOn === true && isPaused === false) {
     pauseTime();
     return;
   }
 
-  if (aboutPomodoro.isPaused === true) {
+  if (isPaused === true) {
     resumeTime();
     return;
   }
 
-  if (!aboutPomodoro.selectedTask) {
+  if (!selectedTask) {
     priorityTitle.innerText = `Select a task`;
     return;
   }
@@ -366,26 +361,26 @@ startButton.addEventListener("click", () => {
     longTimeInput.value = `${longBreak}`;
   }
 
-  aboutPomodoro.isWorking = true;
-  aboutPomodoro. = true;
-  aboutPomodoro.isPaused = false;
+  isWorking = true;
+  isTimerOn = true;
+  isPaused = false;
 
   startCycle(shortBreak, workTime);
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-  aboutPomodoro.timer.style.color = "#0c110c";
+  timer.style.color = "#0c110c";
 });
 
 const reset = () => {
-  aboutPomodoro.timer.innerHTML = "00:00";
+  timer.innerHTML = "00:00";
   startButton.innerHTML = `<i class="fa-solid fa-play"></i>`;
-  aboutPomodoro.timer.style.color = "#0c110c";
-  clearInterval(aboutPomodoro);
-  aboutPomodoro.cycles = 0;
-  aboutPomodoro.time = 0;
-  aboutPomodoro.restTime = 0;
-  aboutPomodoro. = false;
-  aboutPomodoro.isPaused = false;
-  aboutPomodoro.isWorking = false;
+  timer.style.color = "#0c110c";
+  clearInterval(count);
+  cycles = 0;
+  time = 0;
+  restTime = 0;
+  isTimerOn = false;
+  isPaused = false;
+  isWorking = false;
   statusBar.style.width = 100 + "%";
   workTimeInput.value = ``;
   shortBreak = 5;
@@ -393,8 +388,8 @@ const reset = () => {
   longBreak = 10;
   longTimeInput.value = ``;
   cycleStatus.innerText = ``;
-  aboutPomodoro.selectedTask = null;
-  priorityTitle.innerText = ``;
+  selectedTask = null;
+  priorityTitle.innerText = `Pomodoro`;
 };
 
 resetButton.addEventListener("click", () => {
@@ -404,14 +399,14 @@ resetButton.addEventListener("click", () => {
 const startCycle = (rest, work) => {
   playSound(workSound);
   startButton.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-  aboutPomodoro.timer.style.color = "#0c110c";
+  timer.style.color = "#0c110c";
   cycleStatus.innerText = `work`;
-  aboutPomodoro.isWorking = true;
-  aboutPomodoro.time = work * 60;
-  aboutPomodoro.staticTime = aboutPomodoro.time;
-  aboutPomodoro. = false;
-  aboutPomodoro.restTime = rest;
-  aboutPomodoro.count = setInterval(updateCountdown, 100);
+  isWorking = true;
+  time = work * 60;
+  staticTime = time;
+  isCycleDone = false;
+  restTime = rest;
+  count = setInterval(updateCountdown, 100);
 };
 
 const createModalHtml = (finalPopup) => {
@@ -419,7 +414,7 @@ const createModalHtml = (finalPopup) => {
     <div class="popup flex column justify-content-center align-items-center">
       <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
       <h2 class="congrats">Session Complete!</h2>
-      <h3>Is "${aboutPomodoro.selectedTask.text}" finished?</h3>
+      <h3>Is "${selectedTask.text}" finished?</h3>
       <div class="modal-button-container flex align-items-center justify-content-center">
         <button id="yes-done" class="start-button session-button">Yes</button>
         <button id="no-done" class="start-button session-button">No</button>
@@ -443,7 +438,7 @@ const openModal = () => {
 
   if (itsDone) {
     itsDone.addEventListener("click", () => {
-      aboutPomodoro.selectedTask.isDone = true;
+      selectedTask.isDone = true;
       closeModal();
       updateStorage();
       refreshTaskList();
