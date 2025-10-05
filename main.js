@@ -169,6 +169,7 @@ const createTask = (text, type, list, id, checked) => {
   starButton.addEventListener("click", () => starToggle(starButton, text, id));
 };
 
+//findindex
 const deleteButton = (id) => {
   const findIndex = tasks.findIndex((item) => {
     return item.id === id;
@@ -180,6 +181,11 @@ const deleteButton = (id) => {
 };
 
 const starToggle = (starButton, text, id) => {
+//TESTING
+  if (aboutPomodoro.isTimerOn === true) {
+    return;
+  }
+
   const allStars = document.querySelectorAll(".star");
 
   tasks.forEach((task) => {
@@ -285,7 +291,7 @@ const endRestCycle = () => {
   } else if (aboutPomodoro.cycles > aboutPomodoro.cycleLimit) {
     startConfetti();
     openModal();
-    reset();
+   // reset();
   } else {
     return;
   }
@@ -399,6 +405,8 @@ const startCycle = (rest, work) => {
 };
 
 const createModalHtml = (finalPopup) => {
+    console.log(aboutPomodoro.selectedTask);
+
   finalPopup.innerHTML = `
     <div class="popup flex column justify-content-center align-items-center">
       <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
@@ -416,6 +424,7 @@ const openModal = () => {
   const finalPopup = document.createElement("div");
   createModalHtml(finalPopup);
   document.body.appendChild(finalPopup);
+  console.log(aboutPomodoro.selectedTask);
 
   const itsDone = document.getElementById("yes-done");
   const notDone = document.getElementById("no-done");
@@ -423,11 +432,17 @@ const openModal = () => {
 
   const closeModal = () => {
     finalPopup.remove();
+    reset();
   };
 
   if (itsDone) {
     itsDone.addEventListener("click", () => {
+      console.log(tasks);
+
       aboutPomodoro.selectedTask.isDone = true;
+      //if selected task text matches the tast text
+      // (should already be a function..), task.isdone = true 
+
       closeModal();
       updateStorage();
       refreshTaskList();
