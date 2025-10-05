@@ -31,7 +31,7 @@ const aboutPomodoro = {
   isTimerOn: false,
   isCycleDone: false,
   cycles: 0,
-  cycleLimit: 3, //number of cycles
+  cycleLimit: 3,
   isPaused: false,
   time: null,
   isWorking: null,
@@ -180,12 +180,7 @@ const deleteButton = (id) => {
   refreshTaskList();
 };
 
-const starToggle = (starButton, text, id) => {
-//TESTING
-  if (aboutPomodoro.isTimerOn === true) {
-    return;
-  }
-
+const resetStars = () => {
   const allStars = document.querySelectorAll(".star");
 
   tasks.forEach((task) => {
@@ -196,6 +191,14 @@ const starToggle = (starButton, text, id) => {
     star.classList.remove("fa-solid");
     star.classList.add("default-star", "fa-regular");
   });
+};
+
+const starToggle = (starButton, text, id) => {
+  if (aboutPomodoro.isTimerOn === true) {
+    return;
+  }
+
+  resetStars();
 
   aboutPomodoro.selectedTask = tasks.find((task) => {
     return task.id === id;
@@ -291,7 +294,6 @@ const endRestCycle = () => {
   } else if (aboutPomodoro.cycles > aboutPomodoro.cycleLimit) {
     startConfetti();
     openModal();
-   // reset();
   } else {
     return;
   }
@@ -385,6 +387,8 @@ const reset = () => {
   cycleStatus.innerText = ``;
   aboutPomodoro.selectedTask = null;
   priorityTitle.innerText = `Pomodoro`;
+  resetStars();
+
 };
 
 resetButton.addEventListener("click", () => {
@@ -405,8 +409,6 @@ const startCycle = (rest, work) => {
 };
 
 const createModalHtml = (finalPopup) => {
-    console.log(aboutPomodoro.selectedTask);
-
   finalPopup.innerHTML = `
     <div class="popup flex column justify-content-center align-items-center">
       <i id="close-modal-x" class="fa-solid fa-xmark full-width"></i>
@@ -424,7 +426,6 @@ const openModal = () => {
   const finalPopup = document.createElement("div");
   createModalHtml(finalPopup);
   document.body.appendChild(finalPopup);
-  console.log(aboutPomodoro.selectedTask);
 
   const itsDone = document.getElementById("yes-done");
   const notDone = document.getElementById("no-done");
@@ -437,12 +438,7 @@ const openModal = () => {
 
   if (itsDone) {
     itsDone.addEventListener("click", () => {
-      console.log(tasks);
-
       aboutPomodoro.selectedTask.isDone = true;
-      //if selected task text matches the tast text
-      // (should already be a function..), task.isdone = true 
-
       closeModal();
       updateStorage();
       refreshTaskList();
